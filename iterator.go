@@ -27,3 +27,38 @@ type Modifier[T any, S any] func(Iterator[T]) Iterator[S]
 type Number interface {
 	constraints.Float | constraints.Integer
 }
+
+type iterator[T any] struct {
+	next  func() bool
+	get   func() (T, error)
+	err   func() error
+	close func() error
+}
+
+func (iter *iterator[T]) Next() bool {
+	if iter.next != nil {
+		return iter.next()
+	}
+	return false
+}
+
+func (iter *iterator[T]) Get() (T, error) {
+	if iter.get != nil {
+		return iter.get()
+	}
+	return *new(T), nil
+}
+
+func (iter *iterator[T]) Close() error {
+	if iter.close != nil {
+		return iter.close()
+	}
+	return nil
+}
+
+func (iter *iterator[T]) Err() error {
+	if iter.err != nil {
+		return iter.err()
+	}
+	return nil
+}
