@@ -68,6 +68,34 @@ func Descending[T Number](start T, step T) Iterator[T] {
 	}
 }
 
+// Range returns an iterator of numbers from start to end in increments/decrements of step
+// It can include end if it matches a step increment/decrement
+func Range[T Number](start T, end T, step T) Iterator[T] {
+	var asc bool
+	var diff T
+	if end > start {
+		asc = true
+		diff = end - start
+	} else if start > end {
+		asc = false
+		diff = start - end
+	}
+
+	if step == 0 || start == end || diff < step {
+		return Pipe(Const(start), Limit[T](1))
+	}
+
+	if asc {
+		return Pipe(Ascending(start, step), LimitFunc(func(_ uint64, item T) (bool, error) {
+			return item <= end, nil
+		}))
+	} else {
+		return Pipe(Descending(start, step), LimitFunc(func(_ uint64, item T) (bool, error) {
+			return item >= end, nil
+		}))
+	}
+}
+
 func (iter *constIterator[T]) Next() bool      { return true }
 func (iter *constIterator[T]) Get() (T, error) { return iter.value, nil }
 func (iter *constIterator[T]) Close() error    { return nil }
