@@ -33,6 +33,11 @@ func Const[T any](value T) Iterator[T] {
 	return &constIterator[T]{value: value}
 }
 
+// Once returns an iterator with with the given value and size 1
+func Once[T any](value T) Iterator[T] {
+	return Pipe(Const(value), Limit[T](1))
+}
+
 // Fibonacci returns an iterator for fibonacci numbers
 func Fibonacci[T Number]() Iterator[T] {
 	return &fibonacciIterator[T]{}
@@ -41,7 +46,7 @@ func Fibonacci[T Number]() Iterator[T] {
 // Ascending returns an iterator of numbers from start increasing by step
 func Ascending[T Number](start T, step T) Iterator[T] {
 	if step == 0 {
-		return Const(start)
+		return Once(start)
 	}
 	if step < 0 {
 		panic("Ascending: step cannot be less than zero")
@@ -56,7 +61,7 @@ func Ascending[T Number](start T, step T) Iterator[T] {
 // Descending returns an iterator of numbers from start decreasing by step
 func Descending[T Number](start T, step T) Iterator[T] {
 	if step == 0 {
-		return Const(start)
+		return Once(start)
 	}
 	if step < 0 {
 		panic("Descending: step cannot be less than zero")
@@ -82,7 +87,7 @@ func Range[T Number](start T, end T, step T) Iterator[T] {
 	}
 
 	if step == 0 || start == end || diff < step {
-		return Pipe(Const(start), Limit[T](1))
+		return Once(start)
 	}
 
 	if asc {
@@ -123,17 +128,19 @@ func (iter *sequenceIterator[T]) Get() (T, error) {
 func (iter *sequenceIterator[T]) Close() error { return nil }
 func (iter *sequenceIterator[T]) Err() error   { return nil }
 
-func (iter *fibonacciIterator[T]) Next() bool { return true }
-func (iter *fibonacciIterator[T]) Get() (T, error) {
+func (iter *fibonacciIterator[T]) Next() bool {
 	if iter.x1 == 0 && iter.x2 == 0 {
 		iter.x1 = 1
-		return 0, nil
+		return true
 	} else if iter.x1 == 1 && iter.x2 == 0 {
 		iter.x1 = 0
 		iter.x2 = 1
-		return 1, nil
+	} else {
+		iter.x1, iter.x2 = iter.x2, iter.x1+iter.x2
 	}
-	iter.x1, iter.x2 = iter.x2, iter.x1+iter.x2
+	return true
+}
+func (iter *fibonacciIterator[T]) Get() (T, error) {
 	return iter.x2, nil
 }
 func (iter *fibonacciIterator[T]) Close() error { return nil }
