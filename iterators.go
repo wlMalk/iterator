@@ -91,11 +91,11 @@ func Range[T Number](start T, end T, step T) Iterator[T] {
 	}
 
 	if asc {
-		return Pipe(Ascending(start, step), LimitFunc(func(_ uint64, item T) (bool, error) {
+		return Pipe(Ascending(start, step), LimitFunc(func(_ uint, item T) (bool, error) {
 			return item <= end, nil
 		}))
 	} else {
-		return Pipe(Descending(start, step), LimitFunc(func(_ uint64, item T) (bool, error) {
+		return Pipe(Descending(start, step), LimitFunc(func(_ uint, item T) (bool, error) {
 			return item >= end, nil
 		}))
 	}

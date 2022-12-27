@@ -2,9 +2,9 @@ package iterator
 
 // Filter returns a modifier that constantly progresses the iterator to the next item
 // matching pred
-func Filter[T any](pred func(uint64, T) (bool, error)) Modifier[T, T] {
+func Filter[T any](pred func(uint, T) (bool, error)) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
-		var count uint64
+		var count uint
 		var err error
 
 		return &iterator[T]{
@@ -43,8 +43,8 @@ func Filter[T any](pred func(uint64, T) (bool, error)) Modifier[T, T] {
 }
 
 // RemoveFunc returns a modifier that filters away items matching fn
-func RemoveFunc[T any](fn func(uint64, T) (bool, error)) Modifier[T, T] {
-	return Filter(func(i uint64, item T) (bool, error) {
+func RemoveFunc[T any](fn func(uint, T) (bool, error)) Modifier[T, T] {
+	return Filter(func(i uint, item T) (bool, error) {
 		rem, err := fn(i, item)
 		if err != nil {
 			return false, err
@@ -55,7 +55,7 @@ func RemoveFunc[T any](fn func(uint64, T) (bool, error)) Modifier[T, T] {
 
 // Remove returns a modifier that filters away items equal to rem
 func Remove[T comparable](rem T) Modifier[T, T] {
-	return RemoveFunc(func(_ uint64, item T) (bool, error) {
+	return RemoveFunc(func(_ uint, item T) (bool, error) {
 		if item == rem {
 			return true, nil
 		}

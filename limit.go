@@ -2,9 +2,9 @@ package iterator
 
 // LimitFunc returns a modifier that stops the iterator when fn
 // returns false or an error
-func LimitFunc[T any](fn func(uint64, T) (bool, error)) Modifier[T, T] {
+func LimitFunc[T any](fn func(uint, T) (bool, error)) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
-		var count uint64
+		var count uint
 		var finished bool
 		var err error
 
@@ -53,8 +53,8 @@ func LimitFunc[T any](fn func(uint64, T) (bool, error)) Modifier[T, T] {
 
 // Limit returns a modifier that stops the iterator when it
 // has progressed times equal to limit
-func Limit[T any](limit uint64) Modifier[T, T] {
-	return LimitFunc(func(count uint64, _ T) (bool, error) {
+func Limit[T any](limit uint) Modifier[T, T] {
+	return LimitFunc(func(count uint, _ T) (bool, error) {
 		return count < limit, nil
 	})
 }

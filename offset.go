@@ -2,9 +2,9 @@ package iterator
 
 // OffsetFunc returns a modifier that progresses the iterator as long as fn
 // returns true
-func OffsetFunc[T any](fn func(uint64, T) (bool, error)) Modifier[T, T] {
+func OffsetFunc[T any](fn func(uint, T) (bool, error)) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
-		var count uint64
+		var count uint
 		var started bool
 		var err error
 
@@ -57,8 +57,8 @@ func OffsetFunc[T any](fn func(uint64, T) (bool, error)) Modifier[T, T] {
 
 // Offset returns a modifier that progresses the iterator times equal
 // to offset
-func Offset[T any](offset uint64) Modifier[T, T] {
-	return OffsetFunc(func(count uint64, _ T) (bool, error) {
+func Offset[T any](offset uint) Modifier[T, T] {
+	return OffsetFunc(func(count uint, _ T) (bool, error) {
 		return count < offset, nil
 	})
 }
