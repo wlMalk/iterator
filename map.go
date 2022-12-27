@@ -9,23 +9,35 @@ import (
 func Map[T any, S any](fn func(uint, T) (S, error)) Modifier[T, S] {
 	return func(iter Iterator[T]) Iterator[S] {
 		var count uint
+		var item S
+		var err error
 		return &iterator[S]{
 			next: func() bool {
 				if iter.Next() {
+					var tItem T
+					tItem, err = iter.Get()
+					if err != nil {
+						return false
+					}
+					item, err = fn(count, tItem)
+					if err != nil {
+						return false
+					}
 					count++
 					return true
 				}
 				return false
 			},
 			get: func() (S, error) {
-				value, err := iter.Get()
-				if err != nil {
-					return *new(S), err
-				}
-				return fn(count, value)
+				return item, err
 			},
 			close: iter.Close,
-			err:   iter.Err,
+			err: func() error {
+				if err != nil {
+					return err
+				}
+				return iter.Err()
+			},
 		}
 	}
 }
