@@ -4,6 +4,10 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+var (
+	ErrNoItems    = errors.New("iterator: no items in iterator")
+)
+
 // Iterator defines the methods needed to conform to an iterator supported by this package
 type Iterator[T any] interface {
 	// Next moves the iterator to the next position and reports whether
