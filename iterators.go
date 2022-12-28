@@ -277,28 +277,7 @@ func ToChannel[T any](iter Iterator[T], size int) (<-chan ValErr[T], func()) {
 	return stream, func() { cancel <- struct{}{} }
 }
 
-func OnClose[T any](iter Iterator[T], fn func() error) Iterator[T] {
-	var err error
-	return &iterator[T]{
-		next: iter.Next,
-		get:  iter.Get,
-		err: func() error {
-			if err != nil {
-				return err
-			}
-			return iter.Err()
-		},
-		close: func() error {
-			defer iter.Close()
-			if err = fn(); err != nil {
-				return err
-			}
-			err = iter.Close()
-			return err
-		},
-	}
-}
-
+// FromMap returns an iterator wrapping a map source
 func FromMap[K comparable, V any](source map[K]V) Iterator[KV[K, V]] {
 	c := make(chan KV[K, V], len(source)/4)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -322,6 +301,7 @@ func FromMap[K comparable, V any](source map[K]V) Iterator[KV[K, V]] {
 	})
 }
 
+// ToMap consumes all items in a KV iterator into a map
 func ToMap[K comparable, V any](iter Iterator[KV[K, V]]) (map[K]V, error) {
 	out := make(map[K]V)
 
@@ -335,4 +315,27 @@ func ToMap[K comparable, V any](iter Iterator[KV[K, V]]) (map[K]V, error) {
 	}
 
 	return out, nil
+}
+
+// OnClose extends an iterator with a close callback
+func OnClose[T any](iter Iterator[T], fn func() error) Iterator[T] {
+	var err error
+	return &iterator[T]{
+		next: iter.Next,
+		get:  iter.Get,
+		err: func() error {
+			if err != nil {
+				return err
+			}
+			return iter.Err()
+		},
+		close: func() error {
+			defer iter.Close()
+			if err = fn(); err != nil {
+				return err
+			}
+			err = iter.Close()
+			return err
+		},
+	}
 }

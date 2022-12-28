@@ -26,6 +26,12 @@ func checkIteratorEqual[T comparable](t *testing.T, iter Iterator[T], items []T)
 	require.NoError(t, iter.Close())
 }
 
+func checkIteratorEqualUnordered[T comparable](t *testing.T, iter Iterator[T], items []T) {
+	slc, err := ToSlice(iter)
+	require.NoError(t, err)
+	assert.ElementsMatch(t, slc, items)
+}
+
 func checkChannelEqual[T comparable](t *testing.T, c <-chan ValErr[T], items []T) {
 	cIter := FromChannel(c)
 	iter := Map(func(_ uint, item ValErr[T]) (T, error) {
@@ -149,4 +155,44 @@ func TestToChannel(t *testing.T) {
 	a := FromSlice(items)
 	c, _ := ToChannel(a, 1)
 	checkChannelEqual(t, c, []int{1, 2, 3, 4, 5})
+}
+
+func TestFromMap(t *testing.T) {
+	m := map[string]int{
+		"first":  1,
+		"second": 2,
+		"third":  3,
+		"fourth": 4,
+		"fifth":  5,
+	}
+	items := []KV[string, int]{
+		{"first", 1},
+		{"second", 2},
+		{"third", 3},
+		{"fourth", 4},
+		{"fifth", 5},
+	}
+	a := FromMap(m)
+	checkIteratorEqualUnordered(t, a, items)
+}
+
+func TestToMap(t *testing.T) {
+	m1 := map[string]int{
+		"first":  1,
+		"second": 2,
+		"third":  3,
+		"fourth": 4,
+		"fifth":  5,
+	}
+	items := []KV[string, int]{
+		{"first", 1},
+		{"second", 2},
+		{"third", 3},
+		{"fourth", 4},
+		{"fifth", 5},
+	}
+	a := FromSlice(items)
+	m2, err := ToMap(a)
+	require.NoError(t, err)
+	assert.Equal(t, m1, m2)
 }
