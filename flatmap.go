@@ -1,6 +1,6 @@
 package iterator
 
-// FlatMap
+// FlatMap returns a modifier to map items to iterators and flattens them into a single iterator
 func FlatMap[T any, S any](fn func(uint, uint, T) (Iterator[S], error)) Modifier[T, S] {
 	return func(iter Iterator[T]) Iterator[S] {
 		var finished bool
@@ -73,7 +73,8 @@ func FlatMap[T any, S any](fn func(uint, uint, T) (Iterator[S], error)) Modifier
 	}
 }
 
-// Flatten
+// Flatten returns a modifier that applies on iterator of iterators
+// It flattens them into a single iterator
 func Flatten[T any, S Iterator[T]]() Modifier[Iterator[T], T] {
 	return FlatMap(func(_ uint, _ uint, iter Iterator[T]) (Iterator[T], error) {
 		return iter, nil
