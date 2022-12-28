@@ -185,3 +185,92 @@ func (iter *sliceIterator[T]) Next() bool {
 func (iter *sliceIterator[T]) Get() (T, error) { return iter.source[iter.curr], nil }
 func (iter *sliceIterator[T]) Close() error    { return nil }
 func (iter *sliceIterator[T]) Err() error      { return nil }
+
+type (
+	channelIterator[T any] struct {
+		source <-chan T
+		value  T
+	}
+
+	valErrChannelIterator[T any] struct {
+		source <-chan ValErr[T]
+		value  T
+		err    error
+	}
+)
+
+// FromChannel returns an iterator wrapping a channel source
+func FromChannel[T any](source <-chan T) Iterator[T] {
+	return &channelIterator[T]{source: source}
+}
+
+// FromValErrChannel returns an iterator wrapping a channel source with items of type ValErr
+func FromValErrChannel[T any](source <-chan ValErr[T]) Iterator[T] {
+	return &valErrChannelIterator[T]{source: source}
+}
+
+func (iter *channelIterator[T]) Next() bool {
+	iter.value = *new(T)
+
+	if iter.source == nil {
+		return false
+	}
+
+	value, ok := <-iter.source
+	if ok {
+		iter.value = value
+	} else {
+		iter.source = nil
+	}
+
+	return ok
+}
+
+func (iter *valErrChannelIterator[T]) Next() bool {
+	iter.value, iter.err = *new(T), nil
+
+	if iter.source == nil {
+		return false
+	}
+
+	value, ok := <-iter.source
+	if ok {
+		iter.value, iter.err = value.Val, value.Err
+	} else {
+		iter.source = nil
+	}
+
+	return ok
+}
+
+func (iter *channelIterator[T]) Get() (T, error) { return iter.value, nil }
+func (iter *channelIterator[T]) Close() error    { return nil }
+func (iter *channelIterator[T]) Err() error      { return nil }
+
+func (iter *valErrChannelIterator[T]) Get() (T, error) { return iter.value, iter.err }
+func (iter *valErrChannelIterator[T]) Close() error    { return nil }
+func (iter *valErrChannelIterator[T]) Err() error      { return iter.err }
+
+// ToChannel consumes all items in the iterator into a channel with size as capacity
+func ToChannel[T any](iter Iterator[T], size int) (<-chan ValErr[T], func()) {
+	stream := make(chan ValErr[T], size)
+	cancel := make(chan struct{})
+
+	go func() {
+		_, err := Iterate(iter, func(_ uint, item T) (bool, error) {
+			select {
+			case <-cancel:
+				close(stream)
+				return false, nil
+			case stream <- ValErr[T]{Val: item}:
+				return true, nil
+			}
+		})
+		if err != nil {
+			stream <- ValErr[T]{Err: err}
+		}
+		close(stream)
+	}()
+
+	return stream, func() { cancel <- struct{}{} }
+}

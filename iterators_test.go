@@ -26,6 +26,17 @@ func checkIteratorEqual[T comparable](t *testing.T, iter Iterator[T], items []T)
 	require.NoError(t, iter.Close())
 }
 
+func checkChannelEqual[T comparable](t *testing.T, c <-chan ValErr[T], items []T) {
+	cIter := FromChannel(c)
+	iter := Map(func(_ uint, item ValErr[T]) (T, error) {
+		if item.Err != nil {
+			return *new(T), item.Err
+		}
+		return item.Val, nil
+	})(cIter)
+	checkIteratorEqual(t, iter, items)
+}
+
 func TestEmpty(t *testing.T) {
 	a := Empty[int]()
 	checkIteratorEqual(t, a, []int{})
@@ -114,4 +125,28 @@ func TestToSlice(t *testing.T) {
 	s2, err := ToSlice(a)
 	require.NoError(t, err)
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, s2)
+}
+
+func createChannel[T any](items []T) chan T {
+	c := make(chan T)
+	go func() {
+		for _, item := range items {
+			c <- item
+		}
+		close(c)
+	}()
+	return c
+}
+
+func TestFromChannel(t *testing.T) {
+	items := []int{1, 2, 3, 4, 5}
+	a := FromChannel(createChannel(items))
+	checkIteratorEqual(t, a, items)
+}
+
+func TestToChannel(t *testing.T) {
+	items := []int{1, 2, 3, 4, 5}
+	a := FromSlice(items)
+	c, _ := ToChannel(a, 1)
+	checkChannelEqual(t, c, []int{1, 2, 3, 4, 5})
 }
