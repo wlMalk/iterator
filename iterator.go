@@ -27,6 +27,16 @@ type Iterator[T any] interface {
 // to avoid incorrect results
 type Modifier[T any, S any] func(Iterator[T]) Iterator[S]
 
+type KV[K comparable, V any] struct {
+	Key K
+	Val V
+}
+
+type ValErr[T any] struct {
+	Val T
+	Err error
+}
+
 type iterator[T any] struct {
 	next  func() bool
 	get   func() (T, error)
