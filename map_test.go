@@ -36,3 +36,16 @@ func TestReplaceAll(t *testing.T) {
 		checkIteratorEqual(t, cases[i].iter, cases[i].expected)
 	}
 }
+
+func TestClamp(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		expected []int
+	}{
+		{Pipe(Range(-3, 3, 1), Clamp(-1, 1)), []int{-1, -1, -1, 0, 1, 1, 1}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, cases[i].iter, cases[i].expected)
+	}
+}
