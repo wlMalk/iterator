@@ -1,5 +1,7 @@
 package iterator
 
+import "golang.org/x/exp/constraints"
+
 // Fold all items into a single value with a start value by applying fn on all items
 func Fold[T any, S any](iter Iterator[T], start S, fn func(uint, T, S) (S, error)) (S, error) {
 	reduced := start
@@ -36,7 +38,7 @@ func Reduce[T any](iter Iterator[T], fn func(uint, T, T) (T, error)) (T, error) 
 }
 
 // Sum all numbers in the iterator
-func Sum[T Number](iter Iterator[T]) (T, error) {
+func Sum[T constraints.Float | constraints.Integer | constraints.Complex](iter Iterator[T]) (T, error) {
 	return Fold(iter, 0, func(_ uint, item T, total T) (T, error) {
 		return total + item, nil
 	})

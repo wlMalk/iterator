@@ -1,19 +1,23 @@
 package iterator
 
+import (
+	"golang.org/x/exp/constraints"
+)
+
 type emptyIterator[T any] struct{}
 
 type constIterator[T any] struct {
 	value T
 }
 
-type sequenceIterator[T Number] struct {
+type sequenceIterator[T constraints.Float | constraints.Integer] struct {
 	curr    T
 	step    T
 	asc     bool
 	started bool
 }
 
-type fibonacciIterator[T Number] struct {
+type fibonacciIterator[T constraints.Float | constraints.Integer] struct {
 	x1 T
 	x2 T
 }
@@ -39,12 +43,12 @@ func Once[T any](value T) Iterator[T] {
 }
 
 // Fibonacci returns an iterator for fibonacci numbers
-func Fibonacci[T Number]() Iterator[T] {
+func Fibonacci[T constraints.Float | constraints.Integer]() Iterator[T] {
 	return &fibonacciIterator[T]{}
 }
 
 // Ascending returns an iterator of numbers from start increasing by step
-func Ascending[T Number](start T, step T) Iterator[T] {
+func Ascending[T constraints.Float | constraints.Integer](start T, step T) Iterator[T] {
 	if step == 0 {
 		return Once(start)
 	}
@@ -59,7 +63,7 @@ func Ascending[T Number](start T, step T) Iterator[T] {
 }
 
 // Descending returns an iterator of numbers from start decreasing by step
-func Descending[T Number](start T, step T) Iterator[T] {
+func Descending[T constraints.Float | constraints.Integer](start T, step T) Iterator[T] {
 	if step == 0 {
 		return Once(start)
 	}
@@ -75,7 +79,7 @@ func Descending[T Number](start T, step T) Iterator[T] {
 
 // Range returns an iterator of numbers from start to end in increments/decrements of step
 // It can include end if it matches a step increment/decrement
-func Range[T Number](start T, end T, step T) Iterator[T] {
+func Range[T constraints.Float | constraints.Integer](start T, end T, step T) Iterator[T] {
 	var asc bool
 	var diff T
 	if end > start {

@@ -1,7 +1,7 @@
 package iterator
 
 import (
-	"golang.org/x/exp/constraints"
+	"errors"
 )
 
 var (
@@ -26,11 +26,6 @@ type Iterator[T any] interface {
 // The given iterator should not be used for anything else after applying the modifier
 // to avoid incorrect results
 type Modifier[T any, S any] func(Iterator[T]) Iterator[S]
-
-// Number is a constraint for all supported numeric types
-type Number interface {
-	constraints.Float | constraints.Integer
-}
 
 type iterator[T any] struct {
 	next  func() bool
