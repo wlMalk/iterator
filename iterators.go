@@ -1,6 +1,8 @@
 package iterator
 
 import (
+	"context"
+
 	"golang.org/x/exp/constraints"
 )
 
@@ -273,4 +275,64 @@ func ToChannel[T any](iter Iterator[T], size int) (<-chan ValErr[T], func()) {
 	}()
 
 	return stream, func() { cancel <- struct{}{} }
+}
+
+func OnClose[T any](iter Iterator[T], fn func() error) Iterator[T] {
+	var err error
+	return &iterator[T]{
+		next: iter.Next,
+		get:  iter.Get,
+		err: func() error {
+			if err != nil {
+				return err
+			}
+			return iter.Err()
+		},
+		close: func() error {
+			defer iter.Close()
+			if err = fn(); err != nil {
+				return err
+			}
+			err = iter.Close()
+			return err
+		},
+	}
+}
+
+func FromMap[K comparable, V any](source map[K]V) Iterator[KV[K, V]] {
+	c := make(chan KV[K, V], len(source)/4)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		for k, v := range source {
+			select {
+			case <-ctx.Done():
+				close(c)
+				return
+			case c <- KV[K, V]{Key: k, Val: v}:
+				continue
+			}
+		}
+		close(c)
+	}()
+
+	return OnClose(FromChannel(c), func() error {
+		cancel()
+		return nil
+	})
+}
+
+func ToMap[K comparable, V any](iter Iterator[KV[K, V]]) (map[K]V, error) {
+	out := make(map[K]V)
+
+	_, err := Iterate(iter, func(_ uint, item KV[K, V]) (bool, error) {
+		out[item.Key] = item.Val
+
+		return true, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
