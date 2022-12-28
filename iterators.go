@@ -149,3 +149,39 @@ func (iter *fibonacciIterator[T]) Get() (T, error) {
 }
 func (iter *fibonacciIterator[T]) Close() error { return nil }
 func (iter *fibonacciIterator[T]) Err() error   { return nil }
+
+type sliceIterator[T any] struct {
+	source []T
+	curr   int
+}
+
+// FromSlice returns an iterator wrapping a slice source
+func FromSlice[T any](source []T) Iterator[T] {
+	return &sliceIterator[T]{source: source, curr: -1}
+}
+
+// ToSlice consumes all items in the iterator into a slice
+func ToSlice[T any](iter Iterator[T]) ([]T, error) {
+	var data []T
+	_, err := Iterate(iter, func(_ uint, item T) (bool, error) {
+		data = append(data, item)
+		return true, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (iter *sliceIterator[T]) Next() bool {
+	hasNext := iter.curr+1 < len(iter.source)
+	if hasNext {
+		iter.curr++
+	}
+	return hasNext
+}
+
+func (iter *sliceIterator[T]) Get() (T, error) { return iter.source[iter.curr], nil }
+func (iter *sliceIterator[T]) Close() error    { return nil }
+func (iter *sliceIterator[T]) Err() error      { return nil }

@@ -101,3 +101,17 @@ func TestFibonacci(t *testing.T) {
 	a = Limit[int](10)(a)
 	checkIteratorEqual(t, a, []int{0, 1, 1, 2, 3, 5, 8, 13, 21, 34})
 }
+
+func TestFromSlice(t *testing.T) {
+	slice := []int{1, 2, 3, 4, 5}
+	a := FromSlice(slice)
+	checkIteratorEqual(t, a, slice)
+}
+
+func TestToSlice(t *testing.T) {
+	s1 := []int{1, 2, 3, 4, 5}
+	a := FromSlice(s1)
+	s2, err := ToSlice(a)
+	require.NoError(t, err)
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, s2)
+}
