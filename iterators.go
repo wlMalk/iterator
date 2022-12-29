@@ -339,3 +339,59 @@ func OnClose[T any](iter Iterator[T], fn func() error) Iterator[T] {
 		},
 	}
 }
+
+type funcIterator[T any] struct {
+	next func() (T, bool, error)
+
+	value T
+	err   error
+
+	done bool
+}
+
+func (iter *funcIterator[T]) Next() bool {
+	if iter.done {
+		return false
+	}
+
+	var hasMore bool
+	iter.value, hasMore, iter.err = iter.next()
+	if !hasMore {
+		iter.done = true
+	}
+
+	return hasMore
+}
+
+func (iter *funcIterator[T]) Get() (T, error) { return iter.value, iter.err }
+func (iter *funcIterator[T]) Err() error      { return iter.err }
+func (iter *funcIterator[T]) Close() error    { return nil }
+
+// FromFunc returns an iterator wrapping a func source
+func FromFunc[T any](next func() (T, bool, error)) Iterator[T] {
+	return &funcIterator[T]{
+		next: next,
+	}
+}
+
+// ToFunc returns a function to consume all items in the iterator
+func ToFunc[T any](iter Iterator[T]) func() (T, bool, error) {
+	return func() (T, bool, error) {
+		if iter.Next() {
+			item, err := iter.Get()
+			if err != nil {
+				return *new(T), false, err
+			}
+			return item, true, nil
+		}
+
+		if err := iter.Err(); err != nil {
+			return *new(T), false, err
+		}
+		if err := iter.Close(); err != nil {
+			return *new(T), false, err
+		}
+
+		return *new(T), false, nil
+	}
+}

@@ -33,14 +33,11 @@ func checkIteratorEqualUnordered[T comparable](t *testing.T, iter Iterator[T], i
 }
 
 func checkChannelEqual[T comparable](t *testing.T, c <-chan ValErr[T], items []T) {
-	cIter := FromChannel(c)
-	iter := Map(func(_ uint, item ValErr[T]) (T, error) {
-		if item.Err != nil {
-			return *new(T), item.Err
-		}
-		return item.Val, nil
-	})(cIter)
-	checkIteratorEqual(t, iter, items)
+	checkIteratorEqual(t, FromValErrChannel(c), items)
+}
+
+func checkFuncEqual[T comparable](t *testing.T, fn func() (T, bool, error), items []T) {
+	checkIteratorEqual(t, FromFunc(fn), items)
 }
 
 func TestEmpty(t *testing.T) {
@@ -144,10 +141,21 @@ func createChannel[T any](items []T) chan T {
 	return c
 }
 
+func createFunc[T any](items []T) func() (T, bool, error) {
+	var curr int
+	return func() (T, bool, error) {
+		if curr >= len(items) {
+			return *new(T), false, nil
+		}
+		curr++
+		return items[curr-1], true, nil
+	}
+}
+
 func TestFromChannel(t *testing.T) {
 	items := []int{1, 2, 3, 4, 5}
 	a := FromChannel(createChannel(items))
-	checkIteratorEqual(t, a, items)
+	checkIteratorEqual(t, a, []int{1, 2, 3, 4, 5})
 }
 
 func TestToChannel(t *testing.T) {
@@ -195,4 +203,17 @@ func TestToMap(t *testing.T) {
 	m2, err := ToMap(a)
 	require.NoError(t, err)
 	assert.Equal(t, m1, m2)
+}
+
+func TestFromFunc(t *testing.T) {
+	items := []int{1, 2, 3, 4, 5}
+	a := FromFunc(createFunc(items))
+	checkIteratorEqual(t, a, []int{1, 2, 3, 4, 5})
+}
+
+func TestToFunc(t *testing.T) {
+	items := []int{1, 2, 3, 4, 5}
+	a := FromSlice(items)
+	fn := ToFunc(a)
+	checkFuncEqual(t, fn, []int{1, 2, 3, 4, 5})
 }
