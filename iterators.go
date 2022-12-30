@@ -164,7 +164,7 @@ func FromSlice[T any](source []T) Iterator[T] {
 
 // ToSlice consumes all items in the iterator into a slice
 func ToSlice[T any](iter Iterator[T]) ([]T, error) {
-	var data []T
+	data := []T{}
 	_, err := Iterate(iter, func(_ uint, item T) (bool, error) {
 		data = append(data, item)
 		return true, nil

@@ -26,6 +26,12 @@ func checkIteratorEqual[T comparable](t *testing.T, iter Iterator[T], items []T)
 	require.NoError(t, iter.Close())
 }
 
+func checkIteratorSliceEqual[T any](t *testing.T, iter Iterator[T], items []T) {
+	slc, err := ToSlice(iter)
+	require.NoError(t, err)
+	assert.Equal(t, items, slc)
+}
+
 func checkIteratorEqualUnordered[T comparable](t *testing.T, iter Iterator[T], items []T) {
 	slc, err := ToSlice(iter)
 	require.NoError(t, err)
