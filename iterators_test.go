@@ -32,6 +32,12 @@ func checkIteratorSliceEqual[T any](t *testing.T, iter Iterator[T], items []T) {
 	assert.Equal(t, items, slc)
 }
 
+func checkIteratorMapEqual[K comparable, V any](t *testing.T, iter Iterator[KV[K, V]], items map[K]V) {
+	m, err := ToMap(iter)
+	require.NoError(t, err)
+	assert.Equal(t, items, m)
+}
+
 func checkIteratorEqualUnordered[T comparable](t *testing.T, iter Iterator[T], items []T) {
 	slc, err := ToSlice(iter)
 	require.NoError(t, err)
@@ -191,13 +197,6 @@ func TestFromMap(t *testing.T) {
 }
 
 func TestToMap(t *testing.T) {
-	m1 := map[string]int{
-		"first":  1,
-		"second": 2,
-		"third":  3,
-		"fourth": 4,
-		"fifth":  5,
-	}
 	items := []KV[string, int]{
 		{"first", 1},
 		{"second", 2},
@@ -205,10 +204,14 @@ func TestToMap(t *testing.T) {
 		{"fourth", 4},
 		{"fifth", 5},
 	}
-	a := FromSlice(items)
-	m2, err := ToMap(a)
-	require.NoError(t, err)
-	assert.Equal(t, m1, m2)
+
+	checkIteratorMapEqual(t, FromSlice(items), map[string]int{
+		"first":  1,
+		"second": 2,
+		"third":  3,
+		"fourth": 4,
+		"fifth":  5,
+	})
 }
 
 func TestFromFunc(t *testing.T) {

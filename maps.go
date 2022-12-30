@@ -69,16 +69,16 @@ func Assoc[K comparable, V any](keys Iterator[K], values Iterator[V]) Iterator[K
 	}
 }
 
-// AssocKeys returns a modifier that associates the iterator to the given values
-func AssocKeys[K comparable, V any](values Iterator[V]) Modifier[K, KV[K, V]] {
-	return func(keys Iterator[K]) Iterator[KV[K, V]] {
+// AssocKeys returns a modifier that associates the iterator to the given keys
+func AssocKeys[K comparable, V any](keys Iterator[K]) Modifier[V, KV[K, V]] {
+	return func(values Iterator[V]) Iterator[KV[K, V]] {
 		return Assoc(keys, values)
 	}
 }
 
-// AssocValues returns a modifier that associates the iterator to the given keys
-func AssocValues[K comparable, V any](keys Iterator[K]) Modifier[V, KV[K, V]] {
-	return func(values Iterator[V]) Iterator[KV[K, V]] {
+// AssocValues returns a modifier that associates the iterator to the given values
+func AssocValues[K comparable, V any](values Iterator[V]) Modifier[K, KV[K, V]] {
+	return func(keys Iterator[K]) Iterator[KV[K, V]] {
 		return Assoc(keys, values)
 	}
 }
