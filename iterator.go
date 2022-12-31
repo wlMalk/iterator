@@ -6,6 +6,7 @@ import (
 
 var (
 	ErrNoItems    = errors.New("iterator: no items in iterator")
+	ErrMultiItems = errors.New("iterator: multiple items in iterator")
 )
 
 // Iterator defines the methods needed to conform to an iterator supported by this package

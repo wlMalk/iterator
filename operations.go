@@ -97,3 +97,34 @@ func Equal[T comparable](iters ...Iterator[T]) (bool, error) {
 		}
 	}
 }
+
+// One returns the only item of an iterator.
+// If the iterator has no items then it returns ErrNoItems,
+// and if the iterator has more than one item then it returns ErrMultiItems.
+func One[T any](iterator Iterator[T]) (T, error) {
+	defer iterator.Close()
+
+	var t T
+	var err error
+	if iterator.Next() {
+		t, err = iterator.Get()
+		if err != nil {
+			return *new(T), err
+		}
+		if iterator.Next() {
+			return *new(T), ErrMultiItems
+		}
+	} else {
+		return *new(T), ErrNoItems
+	}
+
+	if err := iterator.Err(); err != nil {
+		return *new(T), err
+	}
+
+	if err := iterator.Close(); err != nil {
+		return *new(T), err
+	}
+
+	return t, nil
+}

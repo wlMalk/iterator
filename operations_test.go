@@ -41,3 +41,21 @@ func TestEqual(t *testing.T) {
 		assert.Equal(t, cases[i].expected, equal)
 	}
 }
+
+func TestOne(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		expected int
+		err      error
+	}{
+		{FromSlice([]int{}), 0, ErrNoItems},
+		{FromSlice([]int{1, 2}), 0, ErrMultiItems},
+		{FromSlice([]int{1}), 1, nil},
+	}
+
+	for i := range cases {
+		item, err := One(cases[i].iter)
+		require.ErrorIs(t, err, cases[i].err)
+		assert.Equal(t, cases[i].expected, item)
+	}
+}
