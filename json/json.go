@@ -114,7 +114,76 @@ func (r *Reader[T]) Close() error {
 
 func (r *Reader[T]) Err() error { return r.err }
 
-func Decode[T any](r io.Reader) *Reader[T] {
+type Writer[T any] struct {
+	writer io.Writer
+	iter   it.Iterator[T]
+	array  bool
+
+	indentPrefix string
+	indentValue  string
+}
+
+func (w *Writer[T]) Indent(prefix, indent string) {
+	w.indentPrefix = prefix
+	w.indentValue = indent
+}
+
+func (w *Writer[T]) Write() error {
+	if w.array {
+		if _, err := w.writer.Write([]byte{'['}); err != nil {
+			return err
+		}
+
+		_, err := it.Iterate(w.iter, func(index uint, item T) (bool, error) {
+			if index > 0 {
+				if _, err := w.writer.Write([]byte{','}); err != nil {
+					return false, err
+				}
+			}
+
+			var b []byte
+			var err error
+			if len(w.indentPrefix) > 0 || len(w.indentValue) > 0 {
+				b, err = json.Marshal(item)
+				if err != nil {
+					return false, err
+				}
+			} else {
+				b, err = json.MarshalIndent(item, w.indentPrefix, w.indentValue)
+				if err != nil {
+					return false, err
+				}
+			}
+
+			_, err = w.writer.Write(b)
+			if err != nil {
+				return false, err
+			}
+
+			return true, nil
+		})
+
+		if _, err := w.writer.Write([]byte{']'}); err != nil {
+			return err
+		}
+
+		return err
+	} else {
+		enc := json.NewEncoder(w.writer)
+		if len(w.indentPrefix) > 0 || len(w.indentValue) > 0 {
+			enc.SetIndent(w.indentPrefix, w.indentValue)
+		}
+		_, err := it.Iterate(w.iter, func(_ uint, item T) (bool, error) {
+			if err := enc.Encode(item); err != nil {
+				return false, err
+			}
+			return true, nil
+		})
+		return err
+	}
+}
+
+func Read[T any](r io.Reader) *Reader[T] {
 	dec := json.NewDecoder(r)
 
 	ptrElems := false
@@ -129,52 +198,23 @@ func Decode[T any](r io.Reader) *Reader[T] {
 	return &Reader[T]{dec: dec, ptrElems: ptrElems}
 }
 
-func Encode[T any](w io.Writer, iter it.Iterator[T]) error {
-	enc := json.NewEncoder(w)
-	_, err := it.Iterate(iter, func(_ uint, item T) (bool, error) {
-		if err := enc.Encode(item); err != nil {
-			return false, err
-		}
-		return true, nil
-	})
-	return err
+func Write[T any](w io.Writer, iter it.Iterator[T]) *Writer[T] {
+	return &Writer[T]{
+		writer: w,
+		iter:   iter,
+	}
 }
 
-func DecodeArray[T any](r io.Reader) *Reader[T] {
-	reader := Decode[T](r)
+func ReadArray[T any](r io.Reader) *Reader[T] {
+	reader := Read[T](r)
 	reader.array = true
 	return reader
 }
 
-func EncodeArray[T any](w io.Writer, iter it.Iterator[T]) error {
-	if _, err := w.Write([]byte{'['}); err != nil {
-		return err
-	}
-
-	_, err := it.Iterate(iter, func(index uint, item T) (bool, error) {
-		if index > 0 {
-			if _, err := w.Write([]byte{','}); err != nil {
-				return false, err
-			}
-		}
-
-		b, err := json.Marshal(item)
-		if err != nil {
-			return false, err
-		}
-		_, err = w.Write(b)
-		if err != nil {
-			return false, err
-		}
-
-		return true, nil
-	})
-
-	if _, err := w.Write([]byte{']'}); err != nil {
-		return err
-	}
-
-	return err
+func WriteArray[T any](w io.Writer, iter it.Iterator[T]) *Writer[T] {
+	writer := Write[T](w, iter)
+	writer.array = true
+	return writer
 }
 
 type Iterator[T any] struct {
@@ -187,8 +227,8 @@ func (iter Iterator[T]) MarshalJSON() ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-
-	if err := EncodeArray[T](&buf, iter); err != nil {
+	writer := WriteArray[T](&buf, iter)
+	if err := writer.Write(); err != nil {
 		return nil, err
 	}
 
@@ -201,7 +241,7 @@ func (iter *Iterator[T]) UnmarshalJSON(data []byte) error {
 	}
 
 	r := bytes.NewReader(data)
-	reader := DecodeArray[T](r)
+	reader := ReadArray[T](r)
 	iter.Iterator = reader
 
 	return nil
