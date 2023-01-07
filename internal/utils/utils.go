@@ -14,7 +14,7 @@ type iterator[T any] interface {
 	Err() error
 }
 
-func CheckIteratorEqual[T comparable](t *testing.T, iter iterator[T], items []T) {
+func CheckIteratorEqual[T any](t *testing.T, iter iterator[T], items []T) {
 	defer func() {
 		iter.Close()
 	}()
