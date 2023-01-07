@@ -212,7 +212,7 @@ func ReadArray[T any](r io.Reader) *Reader[T] {
 }
 
 func WriteArray[T any](w io.Writer, iter it.Iterator[T]) *Writer[T] {
-	writer := Write[T](w, iter)
+	writer := Write(w, iter)
 	writer.array = true
 	return writer
 }

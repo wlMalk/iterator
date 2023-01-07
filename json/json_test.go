@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func checkIteratorEqual[T comparable](t *testing.T, iter Iterator[T], items []T) {
+func checkIteratorEqual[T comparable](t *testing.T, iter iterator.Iterator[T], items []T) {
 	utils.CheckIteratorEqual[T](t, iter, items)
 }
 
@@ -26,5 +26,5 @@ func TestIteratorUnmarshalJSON(t *testing.T) {
 	var it Iterator[int]
 	err := json.Unmarshal([]byte("[1,2,3,4,5]"), &it)
 	require.NoError(t, err)
-	checkIteratorEqual(t, it, []int{1, 2, 3, 4, 5})
+	checkIteratorEqual[int](t, it, []int{1, 2, 3, 4, 5})
 }
