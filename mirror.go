@@ -1,5 +1,6 @@
 package iterator
 
+// Mirror creates multiple synchronised iterators with the same underlying iterator
 func Mirror[T any](iter Iterator[T], count int) []Iterator[T] {
 	nextChan := make(chan int)
 	closeChan := make(chan int)
