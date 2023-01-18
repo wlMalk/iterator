@@ -128,3 +128,15 @@ func One[T any](iterator Iterator[T]) (T, error) {
 
 	return t, nil
 }
+
+// Async calls fn with the given iterator in a separate goroutine
+// and returns the result in a ValErr channel.
+func Async[T any, V any](iterator Iterator[T], fn func(Iterator[T]) (V, error)) <-chan ValErr[V] {
+	c := make(chan ValErr[V])
+	go func() {
+		v, err := fn(iterator)
+		c <- ValErr[V]{Val: v, Err: err}
+		close(c)
+	}()
+	return c
+}
