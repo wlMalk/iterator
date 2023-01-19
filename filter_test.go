@@ -22,3 +22,17 @@ func TestRemoveFunc(t *testing.T) {
 	})(Range(0, 10, 1))
 	checkIteratorEqual(t, a, []int{1, 3, 5, 7, 9})
 }
+
+func TestDistinct(t *testing.T) {
+	a := Distinct[int]()(FromSlice([]int{1, 1, 2, 2}))
+	checkIteratorEqual(t, a, []int{1, 2})
+}
+
+func TestDistinctFunc(t *testing.T) {
+	a := DistinctFunc(func(_ uint, item string) (byte, error) {
+		return item[0], nil
+	})(
+		FromSlice([]string{"apple", "avocado", "lemon", "lime"}),
+	)
+	checkIteratorEqual(t, a, []string{"apple", "lemon"})
+}

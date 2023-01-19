@@ -62,3 +62,27 @@ func Remove[T comparable](rem T) Modifier[T, T] {
 		return false, nil
 	})
 }
+
+func DistinctFunc[T any, S comparable](fn func(uint, T) (S, error)) Modifier[T, T] {
+	return func(iter Iterator[T]) Iterator[T] {
+		set := make(map[S]struct{})
+		return RemoveFunc(func(i uint, item T) (bool, error) {
+			key, err := fn(i, item)
+			if err != nil {
+				return false, err
+			}
+			_, ok := set[key]
+			if ok {
+				return true, nil
+			}
+			set[key] = struct{}{}
+			return false, nil
+		})(iter)
+	}
+}
+
+func Distinct[T comparable]() Modifier[T, T] {
+	return DistinctFunc(func(_ uint, item T) (T, error) {
+		return item, nil
+	})
+}
