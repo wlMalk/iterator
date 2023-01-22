@@ -24,7 +24,7 @@ func TestRemoveFunc(t *testing.T) {
 }
 
 func TestDistinct(t *testing.T) {
-	a := Distinct[int]()(FromSlice([]int{1, 1, 2, 2}))
+	a := Distinct(FromSlice([]int{1, 1, 2, 2}))
 	checkIteratorEqual(t, a, []int{1, 2})
 }
 

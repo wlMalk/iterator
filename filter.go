@@ -54,8 +54,9 @@ func DistinctFunc[T any, S comparable](fn func(uint, T) (S, error)) Modifier[T, 
 	}
 }
 
-func Distinct[T comparable]() Modifier[T, T] {
+// Distinct is a modifier that skips duplicate items
+func Distinct[T comparable](iter Iterator[T]) Iterator[T] {
 	return DistinctFunc(func(_ uint, item T) (T, error) {
 		return item, nil
-	})
+	})(iter)
 }
