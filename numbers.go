@@ -125,3 +125,33 @@ func Clamp[T constraints.Ordered](min T, max T) Modifier[T, T] {
 		return item, nil
 	})
 }
+
+// Easing
+func Easing[T constraints.Float](n uint, fn func(float64) float64) Iterator[T] {
+	return Unfold(0, func(_ uint, state float64) (T, float64, bool, error) {
+		if state > float64(n-1) {
+			return *new(T), 0, false, nil
+		}
+		return T(fn(state / float64(n-1))), state + 1, true, nil
+	})
+}
+
+// Normalize
+func Normalize[T constraints.Float | constraints.Integer, S constraints.Float](min, max T) Modifier[T, S] {
+	return Interpolate[T, S](min, max, 0, 1)
+}
+
+// Interpolate
+func Interpolate[T constraints.Float | constraints.Integer, S constraints.Float](start1, end1 T, start2, end2 S) Modifier[T, S] {
+	return Map(func(_ uint, item T) (S, error) {
+		if start1 == end1 {
+			return 0, nil
+		}
+		t := S(item-start1) / S(end1-start1)
+		if end2 < start2 {
+			start2, end2 = end2, start2
+			t = 1.0 - t
+		}
+		return start2 + (end2-start2)*t, nil
+	})
+}

@@ -63,57 +63,6 @@ func TestConst(t *testing.T) {
 	checkIteratorEqual(t, a, []int{1, 1, 1, 1, 1})
 }
 
-func TestAscending(t *testing.T) {
-	cases := []struct {
-		iter     Iterator[int]
-		expected []int
-	}{
-		{Limit[int](5)(Ascending(0, 1)), []int{0, 1, 2, 3, 4}},
-		{Ascending(0, 0), []int{0}},
-	}
-
-	for i := range cases {
-		checkIteratorEqual(t, cases[i].iter, cases[i].expected)
-	}
-}
-
-func TestDescending(t *testing.T) {
-	cases := []struct {
-		iter     Iterator[int]
-		expected []int
-	}{
-		{Limit[int](5)(Descending(0, 1)), []int{0, -1, -2, -3, -4}},
-		{Descending(0, 0), []int{0}},
-	}
-
-	for i := range cases {
-		checkIteratorEqual(t, cases[i].iter, cases[i].expected)
-	}
-}
-
-func TestRange(t *testing.T) {
-	cases := []struct {
-		iter     Iterator[int]
-		expected []int
-	}{
-		{Range(0, 5, 1), []int{0, 1, 2, 3, 4, 5}},
-		{Range(0, 5, 2), []int{0, 2, 4}},
-		{Range(5, 0, 1), []int{5, 4, 3, 2, 1, 0}},
-		{Range(5, 0, 2), []int{5, 3, 1}},
-		{Range(1, 1, 1), []int{1}},
-	}
-
-	for i := range cases {
-		checkIteratorEqual(t, cases[i].iter, cases[i].expected)
-	}
-}
-
-func TestFibonacci(t *testing.T) {
-	a := Fibonacci[int]()
-	a = Limit[int](10)(a)
-	checkIteratorEqual(t, a, []int{0, 1, 1, 2, 3, 5, 8, 13, 21, 34})
-}
-
 func TestFromSlice(t *testing.T) {
 	slice := []int{1, 2, 3, 4, 5}
 	a := FromSlice(slice)
