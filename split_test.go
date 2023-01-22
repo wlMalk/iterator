@@ -9,10 +9,10 @@ func TestSplit(t *testing.T) {
 		iter     Iterator[[]int]
 		expected [][]int
 	}{
-		{ToSlices[int]()(Split(0)(Empty[int]())), [][]int{}},
-		{ToSlices[int]()(Split(0)(FromSlice([]int{1, 2, 3, 1, 2, 3}))), [][]int{{1, 2, 3, 1, 2, 3}}},
+		{ToSlices(Split(0)(Empty[int]())), [][]int{}},
+		{ToSlices(Split(0)(FromSlice([]int{1, 2, 3, 1, 2, 3}))), [][]int{{1, 2, 3, 1, 2, 3}}},
 		{
-			ToSlices[int]()(
+			ToSlices(
 				Split(3)(FromSlice([]int{1, 2, 3, 1, 2, 3})),
 			),
 			[][]int{{1, 2}, {1, 2}},
@@ -29,9 +29,9 @@ func TestSplitLeading(t *testing.T) {
 		iter     Iterator[[]int]
 		expected [][]int
 	}{
-		{ToSlices[int]()(SplitLeading(0)(Empty[int]())), [][]int{}},
+		{ToSlices(SplitLeading(0)(Empty[int]())), [][]int{}},
 		{
-			ToSlices[int]()(
+			ToSlices(
 				SplitLeading(3)(FromSlice([]int{1, 2, 3, 1, 2, 3})),
 			),
 			[][]int{{1, 2, 3}, {1, 2, 3}},
@@ -48,9 +48,9 @@ func TestSplitTrailing(t *testing.T) {
 		iter     Iterator[[]int]
 		expected [][]int
 	}{
-		{ToSlices[int]()(SplitLeading(0)(Empty[int]())), [][]int{}},
+		{ToSlices(SplitLeading(0)(Empty[int]())), [][]int{}},
 		{
-			ToSlices[int]()(
+			ToSlices(
 				SplitTrailing(3)(FromSlice([]int{1, 2, 3, 1, 2, 3})),
 			),
 			[][]int{{1, 2}, {3, 1, 2}, {3}},
@@ -67,10 +67,10 @@ func TestChunk(t *testing.T) {
 		iter     Iterator[[]int]
 		expected [][]int
 	}{
-		{ToSlices[int]()(Chunk[int](0)(Empty[int]())), [][]int{}},
-		{ToSlices[int]()(Chunk[int](0)(FromSlice([]int{1, 2, 3, 1, 2, 3}))), [][]int{{1, 2, 3, 1, 2, 3}}},
+		{ToSlices(Chunk[int](0)(Empty[int]())), [][]int{}},
+		{ToSlices(Chunk[int](0)(FromSlice([]int{1, 2, 3, 1, 2, 3}))), [][]int{{1, 2, 3, 1, 2, 3}}},
 		{
-			ToSlices[int]()(
+			ToSlices(
 				Chunk[int](3)(FromSlice([]int{1, 2, 3, 1, 2, 3})),
 			),
 			[][]int{{1, 2, 3}, {1, 2, 3}},
