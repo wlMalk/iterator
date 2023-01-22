@@ -53,7 +53,7 @@ func Mirror[T any](iter Iterator[T], count int) []Iterator[T] {
 					continue
 				}
 
-				val, err := iter.Get()
+				item, err := iter.Get()
 				if err != nil {
 					curr.SendErr(err)
 					continue
@@ -63,29 +63,21 @@ func Mirror[T any](iter Iterator[T], count int) []Iterator[T] {
 					if b == curr.Buffer || b.IsClosed() {
 						continue
 					}
-					b.Push(val)
+					b.Push(item)
 				}
 
-				curr.SendItem(val)
+				curr.SendItem(item)
 
 			case curr := <-closeChan:
 				closedCount++
 
-				if !curr.Buffer.IsEmpty() {
+				if curr.Buffer.IsEmpty() {
+					err = iter.Close()
+					finished = true
+					curr.SendErr(err)
+				} else {
 					curr.SendErr(nil)
-
-					if closedCount == count {
-						close(nextChan)
-						close(closeChan)
-						return
-					}
-
-					continue
 				}
-
-				err = iter.Close()
-				finished = true
-				curr.SendErr(err)
 
 				if closedCount == count {
 					close(nextChan)
