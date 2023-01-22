@@ -2,8 +2,6 @@ package iterator
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/constraints"
 )
 
 // Map returns a modifier that applies fn on each item from the iterator
@@ -48,18 +46,6 @@ func Strings[T any](iter Iterator[T]) Iterator[string] {
 	return Map(func(_ uint, item T) (string, error) {
 		return fmt.Sprint(item), nil
 	})(iter)
-}
-
-// Clamp returns a modifier to clamps items within min and max inclusively
-func Clamp[T constraints.Ordered](min T, max T) Modifier[T, T] {
-	return Map(func(_ uint, item T) (T, error) {
-		if item < min {
-			return min, nil
-		} else if item > max {
-			return max, nil
-		}
-		return item, nil
-	})
 }
 
 func ToSlices[T any](iter Iterator[Iterator[T]]) Iterator[[]T] {
