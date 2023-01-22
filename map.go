@@ -9,39 +9,13 @@ import (
 // Map returns a modifier that applies fn on each item from the iterator
 // It will replace the item with the value returned from fn
 func Map[T any, S any](fn func(uint, T) (S, error)) Modifier[T, S] {
-	return func(iter Iterator[T]) Iterator[S] {
-		var count uint
-		var item S
-		var err error
-		return &iterator[S]{
-			next: func() bool {
-				if iter.Next() {
-					var tItem T
-					tItem, err = iter.Get()
-					if err != nil {
-						return false
-					}
-					item, err = fn(count, tItem)
-					if err != nil {
-						return false
-					}
-					count++
-					return true
-				}
-				return false
-			},
-			get: func() (S, error) {
-				return item, err
-			},
-			close: iter.Close,
-			err: func() error {
-				if err != nil {
-					return err
-				}
-				return iter.Err()
-			},
+	return FilterMap(func(i uint, item T) (S, bool, error) {
+		nItem, err := fn(i, item)
+		if err != nil {
+			return *new(S), false, err
 		}
-	}
+		return nItem, true, nil
+	})
 }
 
 // Replace returns a modifier that changes occurances of old with new

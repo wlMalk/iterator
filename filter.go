@@ -3,43 +3,16 @@ package iterator
 // Filter returns a modifier that constantly progresses the iterator to the next item
 // matching pred
 func Filter[T any](pred func(uint, T) (bool, error)) Modifier[T, T] {
-	return func(iter Iterator[T]) Iterator[T] {
-		var count uint
-		var err error
-
-		return &iterator[T]{
-			next: func() bool {
-				var matches bool
-				var value T
-
-				for !matches {
-					if !iter.Next() {
-						return false
-					}
-					count++
-					value, err = iter.Get()
-					if err != nil {
-						return false
-					}
-
-					matches, err = pred(count, value)
-					if err != nil {
-						return false
-					}
-				}
-
-				return matches
-			},
-			get:   iter.Get,
-			close: iter.Close,
-			err: func() error {
-				if err != nil {
-					return err
-				}
-				return iter.Err()
-			},
+	return FilterMap(func(i uint, item T) (T, bool, error) {
+		matches, err := pred(i, item)
+		if err != nil {
+			return *new(T), false, err
 		}
-	}
+		if !matches {
+			return *new(T), false, err
+		}
+		return item, matches, nil
+	})
 }
 
 // RemoveFunc returns a modifier that filters away items matching fn
