@@ -62,8 +62,8 @@ func Clamp[T constraints.Ordered](min T, max T) Modifier[T, T] {
 	})
 }
 
-func ToSlices[T any]() Modifier[Iterator[T], []T] {
+func ToSlices[T any](iter Iterator[Iterator[T]]) Iterator[[]T] {
 	return Map(func(_ uint, it Iterator[T]) ([]T, error) {
 		return ToSlice(it)
-	})
+	})(iter)
 }
