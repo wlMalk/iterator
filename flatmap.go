@@ -73,10 +73,10 @@ func FlatMap[T any, S any](fn func(uint, uint, T) (Iterator[S], error)) Modifier
 	}
 }
 
-// Flatten returns a modifier that applies on iterator of iterators
+// Flatten is a modifier that applies on iterator of iterators
 // It flattens them into a single iterator
-func Flatten[T any, S Iterator[T]]() Modifier[Iterator[T], T] {
+func Flatten[T any](iter Iterator[Iterator[T]]) Iterator[T] {
 	return FlatMap(func(_ uint, _ uint, iter Iterator[T]) (Iterator[T], error) {
 		return iter, nil
-	})
+	})(iter)
 }
