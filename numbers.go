@@ -1,6 +1,8 @@
 package iterator
 
 import (
+	"math"
+
 	"golang.org/x/exp/constraints"
 )
 
@@ -114,7 +116,42 @@ func (iter *fibonacciIterator[T]) Get() (T, error) {
 func (iter *fibonacciIterator[T]) Close() error { return nil }
 func (iter *fibonacciIterator[T]) Err() error   { return nil }
 
-// Clamp returns a modifier to clamps items within min and max inclusively
+// Add returns a modifier to add x to items.
+func Add[T constraints.Float | constraints.Integer | ~string](x T) Modifier[T, T] {
+	return Map(func(_ uint, item T) (T, error) { return item + x, nil })
+}
+
+// Sub returns a modifier to subtract x from items.
+func Sub[T constraints.Float | constraints.Integer](x T) Modifier[T, T] {
+	return Map(func(_ uint, item T) (T, error) { return item - x, nil })
+}
+
+// Mul returns a modifier to multiply items by x.
+func Mul[T constraints.Float | constraints.Integer](x T) Modifier[T, T] {
+	return Map(func(_ uint, item T) (T, error) { return item * x, nil })
+}
+
+// Div returns a modifier to divide items by x.
+func Div[T constraints.Float | constraints.Integer](x T) Modifier[T, T] {
+	return Map(func(_ uint, item T) (T, error) { return item / x, nil })
+}
+
+// Pow returns a modifier to raise items to the xth power.
+func Pow[T constraints.Float | constraints.Integer](x T) Modifier[T, T] {
+	return Map(func(_ uint, item T) (T, error) { return T(math.Pow(float64(item), float64(x))), nil })
+}
+
+// Sqrt is a modifier to get the square root of items.
+func Sqrt[T constraints.Float | constraints.Integer](iter Iterator[T]) Iterator[T] {
+	return Map(func(_ uint, item T) (T, error) { return T(math.Sqrt(float64(item))), nil })(iter)
+}
+
+// Mod returns a modifier to mod items with x.
+func Mod[T constraints.Integer](x T) Modifier[T, T] {
+	return Map(func(_ uint, item T) (T, error) { return item % x, nil })
+}
+
+// Clamp returns a modifier to clamps items within min and max inclusively.
 func Clamp[T constraints.Ordered](min T, max T) Modifier[T, T] {
 	return Map(func(_ uint, item T) (T, error) {
 		if item < min {
@@ -126,7 +163,7 @@ func Clamp[T constraints.Ordered](min T, max T) Modifier[T, T] {
 	})
 }
 
-// Easing
+// Easing returns an iterator using an easing function with as many values as n.
 func Easing[T constraints.Float](n uint, fn func(float64) float64) Iterator[T] {
 	return Unfold(0, func(_ uint, state float64) (T, float64, bool, error) {
 		if state > float64(n-1) {
@@ -136,12 +173,12 @@ func Easing[T constraints.Float](n uint, fn func(float64) float64) Iterator[T] {
 	})
 }
 
-// Normalize
+// Normalize returns a modifier that scales down numbers to be in the range [0, 1].
 func Normalize[T constraints.Float | constraints.Integer, S constraints.Float](min, max T) Modifier[T, S] {
 	return Interpolate[T, S](min, max, 0, 1)
 }
 
-// Interpolate
+// Interpolate returns a modifier to map numbers into another range.
 func Interpolate[T constraints.Float | constraints.Integer, S constraints.Float](start1, end1 T, start2, end2 S) Modifier[T, S] {
 	return Map(func(_ uint, item T) (S, error) {
 		if start1 == end1 {

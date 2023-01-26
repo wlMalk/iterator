@@ -93,3 +93,100 @@ func TestInterpolate(t *testing.T) {
 		checkIteratorEqual(t, Interpolate(cases[i].start1, cases[i].end1, cases[i].start2, cases[i].end2)(cases[i].iter), cases[i].expected)
 	}
 }
+
+func TestAdd(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		x        int
+		expected []int
+	}{
+		{Range(1, 5, 1), 1, []int{2, 3, 4, 5, 6}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Add(cases[i].x)(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestSub(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		x        int
+		expected []int
+	}{
+		{Range(1, 5, 1), 1, []int{0, 1, 2, 3, 4}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Sub(cases[i].x)(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestMul(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		x        int
+		expected []int
+	}{
+		{Range(1, 5, 1), 2, []int{2, 4, 6, 8, 10}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Mul(cases[i].x)(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestDiv(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		x        int
+		expected []int
+	}{
+		{Range(2, 10, 2), 2, []int{1, 2, 3, 4, 5}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Div(cases[i].x)(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestPow(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		x        int
+		expected []int
+	}{
+		{Range(1, 5, 1), 2, []int{1, 4, 9, 16, 25}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Pow(cases[i].x)(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestSqrt(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		expected []int
+	}{
+		{FromSlice([]int{1, 4, 9, 16, 25}), []int{1, 2, 3, 4, 5}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Sqrt(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestMod(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		x        int
+		expected []int
+	}{
+		{Range(1, 5, 1), 2, []int{1, 0, 1, 0, 1}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Mod(cases[i].x)(cases[i].iter), cases[i].expected)
+	}
+}
