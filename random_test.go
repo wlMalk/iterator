@@ -5,6 +5,36 @@ import (
 	"testing"
 )
 
+func TestRandom(t *testing.T) {
+	cases := []struct {
+		max      int
+		expected []int
+	}{
+		{10, []int{6, 9, 6, 4, 4, 6, 0, 1, 0, 3}},
+	}
+
+	rand.Seed(1)
+
+	for i := range cases {
+		checkIteratorEqual(t, Limit[int](10)(Random(cases[i].max)), cases[i].expected)
+	}
+}
+
+func TestRandomBetween(t *testing.T) {
+	cases := []struct {
+		min, max int
+		expected []int
+	}{
+		{1, 100, []int{60, 94, 66, 44, 43, 68, 7, 16, 10, 30}},
+	}
+
+	rand.Seed(1)
+
+	for i := range cases {
+		checkIteratorEqual(t, Limit[int](10)(RandomBetween(cases[i].min, cases[i].max)), cases[i].expected)
+	}
+}
+
 func TestSamples(t *testing.T) {
 	cases := []struct {
 		iter               Iterator[int]
