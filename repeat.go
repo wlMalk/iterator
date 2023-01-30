@@ -144,6 +144,7 @@ func Boomerang[T any](times int) Modifier[T, T] {
 	return cycle[T](times, true)
 }
 
+// EchoFunc repeats each element for the returned amount of times using fn on each item.
 func EchoFunc[T any](fn func(uint, T) (int, error)) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
 		var count uint
@@ -189,6 +190,7 @@ func EchoFunc[T any](fn func(uint, T) (int, error)) Modifier[T, T] {
 	}
 }
 
+// Echo repeats each element for the given times.
 func Echo[T any](times int) Modifier[T, T] {
 	return EchoFunc(func(_ uint, _ T) (int, error) {
 		return times, nil
