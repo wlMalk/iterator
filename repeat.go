@@ -3,6 +3,9 @@ package iterator
 // Repeat the items in the range [from, to) for as many times given.
 // All other items outside this range are included in the iterator as well.
 func Repeat[T any](from uint, to uint, times int) Modifier[T, T] {
+	if times < 0 {
+		times = 0
+	}
 	return func(iter Iterator[T]) Iterator[T] {
 		var count uint
 		if from > to {
@@ -63,6 +66,9 @@ func Repeat[T any](from uint, to uint, times int) Modifier[T, T] {
 }
 
 func cycle[T any](times int, reversed bool) Modifier[T, T] {
+	if times < 0 {
+		times = 0
+	}
 	return func(iter Iterator[T]) Iterator[T] {
 		var items []T
 		var curr, currTime = -1, 0
@@ -136,4 +142,55 @@ func Cycle[T any](times int) Modifier[T, T] {
 // Boomerang repeats the iterator for as many times given and alternates between reverse and original order.
 func Boomerang[T any](times int) Modifier[T, T] {
 	return cycle[T](times, true)
+}
+
+func EchoFunc[T any](fn func(uint, T) (int, error)) Modifier[T, T] {
+	return func(iter Iterator[T]) Iterator[T] {
+		var count uint
+		var item T
+		var times int
+		var curr int
+		var isRepeating bool
+		return OnClose(FromFunc(func() (T, bool, error) {
+			if isRepeating && curr < times {
+				curr++
+				return item, true, nil
+			}
+			isRepeating = false
+
+			if iter.Next() {
+				var err error
+				item, err = iter.Get()
+				if err != nil {
+					return *new(T), false, err
+				}
+				times, err = fn(count, item)
+				if err != nil {
+					return *new(T), false, err
+				}
+				if times > 0 {
+					isRepeating = true
+					curr = 0
+				}
+				count++
+				return item, true, nil
+			}
+
+			if err := iter.Err(); err != nil {
+				return *new(T), false, err
+			}
+
+			if err := iter.Close(); err != nil {
+				return *new(T), false, err
+			}
+
+			return *new(T), false, nil
+		}), iter.Close)
+	}
+}
+
+func Echo[T any](times int) Modifier[T, T] {
+	return EchoFunc(func(_ uint, _ T) (int, error) {
+		return times, nil
+	})
 }
