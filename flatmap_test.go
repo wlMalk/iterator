@@ -12,7 +12,7 @@ func TestFlatMap(t *testing.T) {
 	}{
 		{Pipe(
 			FromSlice([]string{"Hello", "World"}),
-			FlatMap(func(_ uint, _ uint, str string) (Iterator[string], error) {
+			FlatMap(func(_ int, _ int, str string) (Iterator[string], error) {
 				return FromSlice(strings.Split(str, "")), nil
 			}),
 		), []string{"H", "e", "l", "l", "o", "W", "o", "r", "l", "d"}},

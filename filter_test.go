@@ -5,7 +5,7 @@ import (
 )
 
 func TestFilter(t *testing.T) {
-	a := Filter(func(_ uint, item int) (bool, error) {
+	a := Filter(func(_ int, item int) (bool, error) {
 		return item%2 == 0, nil
 	})(Range(0, 10, 1))
 	checkIteratorEqual(t, a, []int{0, 2, 4, 6, 8, 10})
@@ -17,7 +17,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestRemoveFunc(t *testing.T) {
-	a := RemoveFunc(func(_ uint, item int) (bool, error) {
+	a := RemoveFunc(func(_ int, item int) (bool, error) {
 		return item%2 == 0, nil
 	})(Range(0, 10, 1))
 	checkIteratorEqual(t, a, []int{1, 3, 5, 7, 9})
@@ -29,7 +29,7 @@ func TestDistinct(t *testing.T) {
 }
 
 func TestDistinctFunc(t *testing.T) {
-	a := DistinctFunc(func(_ uint, item string) (byte, error) {
+	a := DistinctFunc(func(_ int, item string) (byte, error) {
 		return item[0], nil
 	})(
 		FromSlice([]string{"apple", "avocado", "lemon", "lime"}),

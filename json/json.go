@@ -134,7 +134,7 @@ func (w *Writer[T]) Write() error {
 			return err
 		}
 
-		_, err := it.Iterate(w.iter, func(index uint, item T) (bool, error) {
+		_, err := it.Iterate(w.iter, func(index int, item T) (bool, error) {
 			if index > 0 {
 				if _, err := w.writer.Write([]byte{','}); err != nil {
 					return false, err
@@ -173,7 +173,7 @@ func (w *Writer[T]) Write() error {
 		if len(w.indentPrefix) > 0 || len(w.indentValue) > 0 {
 			enc.SetIndent(w.indentPrefix, w.indentValue)
 		}
-		_, err := it.Iterate(w.iter, func(_ uint, item T) (bool, error) {
+		_, err := it.Iterate(w.iter, func(_ int, item T) (bool, error) {
 			if err := enc.Encode(item); err != nil {
 				return false, err
 			}

@@ -2,14 +2,14 @@ package iterator
 
 // SplitFunc returns a modifier that splits the iterator when fn returns true
 // The return values of fn also determine whether the item should be part of the firat part, second part, both or neither
-func SplitFunc[T any](fn func(uint, T) (split, inA, inB bool, err error)) Modifier[T, Iterator[T]] {
+func SplitFunc[T any](fn func(int, T) (split, inA, inB bool, err error)) Modifier[T, Iterator[T]] {
 	return func(iter Iterator[T]) Iterator[Iterator[T]] {
 		var finished bool
 		var curr Iterator[T]
 		var err error
 		var item T
 		var startWithItem bool
-		var count uint
+		var count int
 
 		next := func() func() (T, bool, error) {
 			var iteratorFinished bool
@@ -113,21 +113,21 @@ func SplitFunc[T any](fn func(uint, T) (split, inA, inB bool, err error)) Modifi
 // Split returns a modifier that splits the iterator when it encounters
 // an item equal to sep
 func Split[T comparable](sep T) Modifier[T, Iterator[T]] {
-	return SplitFunc(func(_ uint, item T) (bool, bool, bool, error) {
+	return SplitFunc(func(_ int, item T) (bool, bool, bool, error) {
 		return item == sep, false, false, nil
 	})
 }
 
 // SplitLeading is like Split but includes sep at the end of leading part.
 func SplitLeading[T comparable](sep T) Modifier[T, Iterator[T]] {
-	return SplitFunc(func(_ uint, item T) (bool, bool, bool, error) {
+	return SplitFunc(func(_ int, item T) (bool, bool, bool, error) {
 		return item == sep, true, false, nil
 	})
 }
 
 // SplitTrailing is like Split but includes sep at the start of trailing part.
 func SplitTrailing[T comparable](sep T) Modifier[T, Iterator[T]] {
-	return SplitFunc(func(_ uint, item T) (bool, bool, bool, error) {
+	return SplitFunc(func(_ int, item T) (bool, bool, bool, error) {
 		return item == sep, false, true, nil
 	})
 }
@@ -135,11 +135,11 @@ func SplitTrailing[T comparable](sep T) Modifier[T, Iterator[T]] {
 // Chunk returns a modifier that splits the iterator into smaller chunks
 func Chunk[T any](size int) Modifier[T, Iterator[T]] {
 	return func(iter Iterator[T]) Iterator[Iterator[T]] {
-		return SplitFunc(func(i uint, _ T) (bool, bool, bool, error) {
+		return SplitFunc(func(i int, _ T) (bool, bool, bool, error) {
 			if size == 0 {
 				return false, false, false, nil
 			}
-			shouldSplit := i != 0 && i%uint(size) == 0
+			shouldSplit := i != 0 && i%int(size) == 0
 			return shouldSplit, false, shouldSplit, nil
 		})(iter)
 	}

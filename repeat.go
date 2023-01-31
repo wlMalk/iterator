@@ -2,12 +2,12 @@ package iterator
 
 // Repeat the items in the range [from, to) for as many times given.
 // All other items outside this range are included in the iterator as well.
-func Repeat[T any](from uint, to uint, times int) Modifier[T, T] {
+func Repeat[T any](from int, to int, times int) Modifier[T, T] {
 	if times < 0 {
 		times = 0
 	}
 	return func(iter Iterator[T]) Iterator[T] {
-		var count uint
+		var count int
 		if from > to {
 			from, to = to, from
 		}
@@ -145,9 +145,9 @@ func Boomerang[T any](times int) Modifier[T, T] {
 }
 
 // EchoFunc repeats each element for the returned amount of times using fn on each item.
-func EchoFunc[T any](fn func(uint, T) (int, error)) Modifier[T, T] {
+func EchoFunc[T any](fn func(int, T) (int, error)) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
-		var count uint
+		var count int
 		var item T
 		var times int
 		var curr int
@@ -192,7 +192,7 @@ func EchoFunc[T any](fn func(uint, T) (int, error)) Modifier[T, T] {
 
 // Echo repeats each element for the given times.
 func Echo[T any](times int) Modifier[T, T] {
-	return EchoFunc(func(_ uint, _ T) (int, error) {
+	return EchoFunc(func(_ int, _ T) (int, error) {
 		return times, nil
 	})
 }

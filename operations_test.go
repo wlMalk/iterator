@@ -10,7 +10,7 @@ import (
 func TestLen(t *testing.T) {
 	cases := []struct {
 		iter     Iterator[int]
-		expected uint
+		expected int
 	}{
 		{Empty[int](), 0},
 		{Once(1), 1},

@@ -53,7 +53,7 @@ func FromSlice[T any](source []T) Iterator[T] {
 // ToSlice consumes all items in the iterator into a slice
 func ToSlice[T any](iter Iterator[T]) ([]T, error) {
 	data := []T{}
-	_, err := Iterate(iter, func(_ uint, item T) (bool, error) {
+	_, err := Iterate(iter, func(_ int, item T) (bool, error) {
 		data = append(data, item)
 		return true, nil
 	})
@@ -147,7 +147,7 @@ func ToChannel[T any](iter Iterator[T], size int) (<-chan ValErr[T], func()) {
 	cancel := make(chan struct{})
 
 	go func() {
-		_, err := Iterate(iter, func(_ uint, item T) (bool, error) {
+		_, err := Iterate(iter, func(_ int, item T) (bool, error) {
 			select {
 			case <-cancel:
 				close(stream)
@@ -193,7 +193,7 @@ func FromMap[K comparable, V any](source map[K]V) Iterator[KV[K, V]] {
 func ToMap[K comparable, V any](iter Iterator[KV[K, V]]) (map[K]V, error) {
 	out := make(map[K]V)
 
-	_, err := Iterate(iter, func(_ uint, item KV[K, V]) (bool, error) {
+	_, err := Iterate(iter, func(_ int, item KV[K, V]) (bool, error) {
 		out[item.Key] = item.Val
 
 		return true, nil

@@ -36,10 +36,10 @@ func RandomBetween[T constraints.Float | constraints.Integer](min, max T) Iterat
 
 // SamplesFunc returns a modifier that returns random samples from the given iterator.
 // It uses fn as a random number generator in the interval [0.0,1.0).
-func SamplesFunc[T any](population, sample uint, fn func() float64) Modifier[T, T] {
+func SamplesFunc[T any](population, sample int, fn func() float64) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
 		origPopulation, population, sample := population, population, sample
-		var count uint
+		var count int
 		var finished bool
 		var err error
 
@@ -78,6 +78,6 @@ func SamplesFunc[T any](population, sample uint, fn func() float64) Modifier[T, 
 }
 
 // Samples returns a modifier that returns random samples from the given iterator.
-func Samples[T any](population, sample uint) Modifier[T, T] {
+func Samples[T any](population, sample int) Modifier[T, T] {
 	return SamplesFunc[T](population, sample, rand.Float64)
 }

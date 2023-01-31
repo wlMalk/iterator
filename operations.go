@@ -9,8 +9,8 @@ func Pipe[T any](iter Iterator[T], mods ...Modifier[T, T]) Iterator[T] {
 	return iter
 }
 
-func Iterate[T any](iterator Iterator[T], f func(uint, T) (bool, error)) (uint, error) {
-	var count uint
+func Iterate[T any](iterator Iterator[T], f func(int, T) (bool, error)) (int, error) {
+	var count int
 	shouldContinue := true
 	for shouldContinue && iterator.Next() {
 		r, err := iterator.Get()
@@ -36,8 +36,8 @@ func Iterate[T any](iterator Iterator[T], f func(uint, T) (bool, error)) (uint, 
 }
 
 // Len exhausts the iterator to return its length
-func Len[T any](iter Iterator[T]) (uint, error) {
-	var count uint
+func Len[T any](iter Iterator[T]) (int, error) {
+	var count int
 	for iter.Next() {
 		count++
 	}

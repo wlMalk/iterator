@@ -7,7 +7,7 @@ import (
 func TestRepeat(t *testing.T) {
 	cases := []struct {
 		iter     Iterator[int]
-		from, to uint
+		from, to int
 		times    int
 		expected []int
 	}{
@@ -99,6 +99,6 @@ func TestEchoFunc(t *testing.T) {
 	}
 
 	for i := range cases {
-		checkIteratorEqual(t, EchoFunc(func(_ uint, i int) (int, error) { return i - 1, nil })(cases[i].iter), cases[i].expected)
+		checkIteratorEqual(t, EchoFunc(func(_ int, i int) (int, error) { return i - 1, nil })(cases[i].iter), cases[i].expected)
 	}
 }

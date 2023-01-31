@@ -28,7 +28,7 @@ func TestRead(t *testing.T) {
 
 func TestWrite(t *testing.T) {
 	iter := iterator.Map(
-		func(_ uint, item string) ([]string, error) {
+		func(_ int, item string) ([]string, error) {
 			return []string{item, item}, nil
 		},
 	)(

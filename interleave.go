@@ -2,14 +2,14 @@ package iterator
 
 type interleaveItem[T any] struct {
 	item     T
-	count    uint
+	count    int
 	pending  bool
 	finished bool
 }
 
 // InterleaveFunc returns an iterator that alternates between the given iterators.
 // It switches to the next iterator when fn returns true.
-func InterleaveFunc[T any](fn func(iterIndex int, currRun int, index uint, item T) (bool, error), iters ...Iterator[T]) Iterator[T] {
+func InterleaveFunc[T any](fn func(iterIndex int, currRun int, index int, item T) (bool, error), iters ...Iterator[T]) Iterator[T] {
 	if len(iters) == 0 {
 		return Empty[T]()
 	}
@@ -101,9 +101,9 @@ func InterleaveFunc[T any](fn func(iterIndex int, currRun int, index uint, item 
 }
 
 // InjectFunc returns a modifier that injects items from the given iterator once fn returns true
-func InjectFunc[T any](in Iterator[T], fn func(uint, T) (bool, error)) Modifier[T, T] {
+func InjectFunc[T any](in Iterator[T], fn func(int, T) (bool, error)) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
-		return InterleaveFunc(func(iterIndex int, _ int, index uint, item T) (bool, error) {
+		return InterleaveFunc(func(iterIndex int, _ int, index int, item T) (bool, error) {
 			if iterIndex == 1 {
 				return false, nil
 			}
@@ -113,26 +113,26 @@ func InjectFunc[T any](in Iterator[T], fn func(uint, T) (bool, error)) Modifier[
 }
 
 // Inject returns a modifier that injects items from the given iterator at the given index
-func Inject[T any](index uint, in Iterator[T]) Modifier[T, T] {
-	return InjectFunc(in, func(i uint, _ T) (bool, error) {
+func Inject[T any](index int, in Iterator[T]) Modifier[T, T] {
+	return InjectFunc(in, func(i int, _ T) (bool, error) {
 		return i == index, nil
 	})
 }
 
 // InsertFunc returns a modifier that inserts the given items once fn returns true
-func InsertFunc[T any](fn func(uint, T) (bool, error), items ...T) Modifier[T, T] {
+func InsertFunc[T any](fn func(int, T) (bool, error), items ...T) Modifier[T, T] {
 	return InjectFunc(FromSlice(items), fn)
 }
 
 // Insert returns a modifier that inserts the given items once fn returns true
-func Insert[T any](index uint, items ...T) Modifier[T, T] {
+func Insert[T any](index int, items ...T) Modifier[T, T] {
 	return Inject(index, FromSlice(items))
 }
 
 // Interleave returns an iterator that alternates between the given iterators.
 // It will try to take as many as count from each iterator in each round
 func Interleave[T any](count int, iters ...Iterator[T]) Iterator[T] {
-	return InterleaveFunc(func(_ int, currRun int, _ uint, _ T) (bool, error) {
+	return InterleaveFunc(func(_ int, currRun int, _ int, _ T) (bool, error) {
 		return currRun == count, nil
 	}, iters...)
 }

@@ -19,7 +19,7 @@ func TestReduce(t *testing.T) {
 	}
 
 	for i := range cases {
-		sum, err := Reduce(cases[i].iter, func(_ uint, item, sum int) (int, error) {
+		sum, err := Reduce(cases[i].iter, func(_ int, item, sum int) (int, error) {
 			return sum + item, nil
 		})
 		require.ErrorIs(t, err, cases[i].err)

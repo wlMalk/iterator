@@ -5,7 +5,7 @@ import (
 )
 
 // GroupFunc
-func GroupFunc[T any, S comparable](fn func(uint, T) (S, error)) Modifier[T, Iterator[T]] {
+func GroupFunc[T any, S comparable](fn func(int, T) (S, error)) Modifier[T, Iterator[T]] {
 	return func(iter Iterator[T]) Iterator[Iterator[T]] {
 		g := newGroupsHandler(iter, fn)
 		go g.handle()
@@ -15,17 +15,17 @@ func GroupFunc[T any, S comparable](fn func(uint, T) (S, error)) Modifier[T, Ite
 
 // Group
 func Group[T comparable](iter Iterator[T]) Iterator[Iterator[T]] {
-	return GroupFunc(func(_ uint, item T) (T, error) {
+	return GroupFunc(func(_ int, item T) (T, error) {
 		return item, nil
 	})(iter)
 }
 
-func uniquesFunc[T any, S comparable](fn func(uint, T) (S, error), uniquesOnly bool) Modifier[T, T] {
+func uniquesFunc[T any, S comparable](fn func(int, T) (S, error), uniquesOnly bool) Modifier[T, T] {
 	return func(iter Iterator[T]) Iterator[T] {
-		return FilterMap(func(_ uint, group Iterator[T]) (T, bool, error) {
+		return FilterMap(func(_ int, group Iterator[T]) (T, bool, error) {
 			var item T
 			var isDuplicate bool
-			if _, err := Iterate(group, func(i uint, groupItem T) (bool, error) {
+			if _, err := Iterate(group, func(i int, groupItem T) (bool, error) {
 				if i > 0 {
 					isDuplicate = true
 					return false, nil
@@ -44,32 +44,32 @@ func uniquesFunc[T any, S comparable](fn func(uint, T) (S, error), uniquesOnly b
 }
 
 // DuplicatesFunc
-func DuplicatesFunc[T any, S comparable](fn func(uint, T) (S, error)) Modifier[T, T] {
+func DuplicatesFunc[T any, S comparable](fn func(int, T) (S, error)) Modifier[T, T] {
 	return uniquesFunc(fn, false)
 }
 
 // Duplicates
 func Duplicates[T comparable](iter Iterator[T]) Iterator[T] {
-	return DuplicatesFunc(func(_ uint, item T) (T, error) {
+	return DuplicatesFunc(func(_ int, item T) (T, error) {
 		return item, nil
 	})(iter)
 }
 
 // UniquesFunc
-func UniquesFunc[T any, S comparable](fn func(uint, T) (S, error)) Modifier[T, T] {
+func UniquesFunc[T any, S comparable](fn func(int, T) (S, error)) Modifier[T, T] {
 	return uniquesFunc(fn, true)
 }
 
 // Uniques
 func Uniques[T comparable](iter Iterator[T]) Iterator[T] {
-	return UniquesFunc(func(_ uint, item T) (T, error) {
+	return UniquesFunc(func(_ int, item T) (T, error) {
 		return item, nil
 	})(iter)
 }
 
 type groupsHandler[T any, S comparable] struct {
 	source Iterator[T]
-	fn     func(uint, T) (S, error)
+	fn     func(int, T) (S, error)
 
 	parentNextChan    chan *buffer.Iterator[Iterator[T]]
 	parentCloseChan   chan *buffer.Iterator[Iterator[T]]
@@ -85,10 +85,10 @@ type groupsHandler[T any, S comparable] struct {
 	finished    bool
 	err         error
 	closedCount int
-	count       uint
+	count       int
 }
 
-func newGroupsHandler[T any, S comparable](source Iterator[T], fn func(uint, T) (S, error)) *groupsHandler[T, S] {
+func newGroupsHandler[T any, S comparable](source Iterator[T], fn func(int, T) (S, error)) *groupsHandler[T, S] {
 	parentNextChan := make(chan *buffer.Iterator[Iterator[T]])
 	parentCloseChan := make(chan *buffer.Iterator[Iterator[T]])
 	childrenNextChan := make(chan *buffer.Iterator[T])

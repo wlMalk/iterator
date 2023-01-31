@@ -1,8 +1,8 @@
 package iterator
 
 // Unfold generates an iterator from fn using the given initial state
-func Unfold[T any, S any](state S, fn func(uint, S) (T, S, bool, error)) Iterator[T] {
-	var count uint
+func Unfold[T any, S any](state S, fn func(int, S) (T, S, bool, error)) Iterator[T] {
+	var count int
 	var hasMore bool
 	var item T
 	var err error

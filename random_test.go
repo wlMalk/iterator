@@ -38,7 +38,7 @@ func TestRandomBetween(t *testing.T) {
 func TestSamples(t *testing.T) {
 	cases := []struct {
 		iter               Iterator[int]
-		population, sample uint
+		population, sample int
 		expected           []int
 	}{
 		{Range(1, 100, 1), 100, 10, []int{7, 9, 32, 36, 38, 54, 56, 71, 89, 98}},
@@ -54,7 +54,7 @@ func TestSamples(t *testing.T) {
 func TestSamplesFunc(t *testing.T) {
 	cases := []struct {
 		iter               Iterator[int]
-		population, sample uint
+		population, sample int
 		fn                 func() float64
 		expected           []int
 	}{

@@ -19,7 +19,7 @@ func Merge[T any](iters ...Iterator[T]) Iterator[T] {
 				wg.Done()
 			}()
 			var stopped bool
-			_, err := Iterate(iters[i], func(index uint, item T) (bool, error) {
+			_, err := Iterate(iters[i], func(index int, item T) (bool, error) {
 				select {
 				case <-ctx.Done():
 					stopped = true

@@ -2,14 +2,14 @@ package iterator
 
 // Keys is a modifier that takes a map iterator and returns an iterator for the keys
 func Keys[K comparable, V any](iter Iterator[KV[K, V]]) Iterator[K] {
-	return Map(func(_ uint, item KV[K, V]) (K, error) {
+	return Map(func(_ int, item KV[K, V]) (K, error) {
 		return item.Key, nil
 	})(iter)
 }
 
 // Values is a modifier that takes a map iterator and returns an iterator for the values
 func Values[K comparable, V any](iter Iterator[KV[K, V]]) Iterator[V] {
-	return Map(func(_ uint, item KV[K, V]) (V, error) {
+	return Map(func(_ int, item KV[K, V]) (V, error) {
 		return item.Val, nil
 	})(iter)
 }

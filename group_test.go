@@ -14,7 +14,7 @@ func TestGroup(t *testing.T) {
 
 func TestGroupFunc(t *testing.T) {
 	iter := Range(0, 9, 1)
-	grouped := GroupFunc(func(_ uint, item int) (bool, error) { return item%2 == 0, nil })(iter)
+	grouped := GroupFunc(func(_ int, item int) (bool, error) { return item%2 == 0, nil })(iter)
 	flattened := Flatten(grouped)
 
 	checkIteratorEqual(t, flattened, []int{0, 2, 4, 6, 8, 1, 3, 5, 7, 9})

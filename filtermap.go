@@ -2,9 +2,9 @@ package iterator
 
 // FilterMap returns a modifier that constantly progresses the iterator to the next item
 // matching fn, and transforms it into an iterator for a different type.
-func FilterMap[T any, S any](fn func(uint, T) (S, bool, error)) Modifier[T, S] {
+func FilterMap[T any, S any](fn func(int, T) (S, bool, error)) Modifier[T, S] {
 	return func(iter Iterator[T]) Iterator[S] {
-		var count uint
+		var count int
 		var curr S
 		var err error
 

@@ -3,10 +3,10 @@ package iterator
 import "golang.org/x/exp/constraints"
 
 // Fold all items into a single value with a start value by applying fn on all items
-func Fold[T any, S any](iter Iterator[T], start S, fn func(uint, T, S) (S, error)) (S, error) {
+func Fold[T any, S any](iter Iterator[T], start S, fn func(int, T, S) (S, error)) (S, error) {
 	reduced := start
 
-	_, err := Iterate(iter, func(i uint, value T) (bool, error) {
+	_, err := Iterate(iter, func(i int, value T) (bool, error) {
 		var err error
 		reduced, err = fn(i, value, reduced)
 		if err != nil {
@@ -22,7 +22,7 @@ func Fold[T any, S any](iter Iterator[T], start S, fn func(uint, T, S) (S, error
 }
 
 // Reduce all items into a single value by applying fn on all items
-func Reduce[T any](iter Iterator[T], fn func(uint, T, T) (T, error)) (T, error) {
+func Reduce[T any](iter Iterator[T], fn func(int, T, T) (T, error)) (T, error) {
 	if !iter.Next() {
 		iter.Close()
 		return *new(T), ErrNoItems
@@ -39,14 +39,14 @@ func Reduce[T any](iter Iterator[T], fn func(uint, T, T) (T, error)) (T, error) 
 
 // Sum all numbers in the iterator
 func Sum[T constraints.Float | constraints.Integer | constraints.Complex](iter Iterator[T]) (T, error) {
-	return Fold(iter, 0, func(_ uint, item T, total T) (T, error) {
+	return Fold(iter, 0, func(_ int, item T, total T) (T, error) {
 		return total + item, nil
 	})
 }
 
 // Concat all items with the given separator
 func Concat[T ~string](iter Iterator[T], sep T) (T, error) {
-	res, err := Fold(iter, sep, func(i uint, item T, total T) (T, error) {
+	res, err := Fold(iter, sep, func(i int, item T, total T) (T, error) {
 		if i == 0 {
 			return total + item, nil
 		}

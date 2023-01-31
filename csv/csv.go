@@ -121,7 +121,7 @@ func (w *Writer[T]) Write() error {
 		}
 	}
 
-	_, err := it.Iterate(w.iter, func(_ uint, row []T) (bool, error) {
+	_, err := it.Iterate(w.iter, func(_ int, row []T) (bool, error) {
 		fields := make([]string, len(row))
 		for i := range fields {
 			fields[i] = string(row[i])
