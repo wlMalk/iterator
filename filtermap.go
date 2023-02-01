@@ -44,6 +44,46 @@ func Slice[T any](from, to, step int) Modifier[T, T] {
 	})
 }
 
+// DropWhile returns a modifier which makes the iterator drop items
+// matching pred and starts with the first item that does not.
+func DropWhile[T any](pred func(int, T) (bool, error)) Modifier[T, T] {
+	var stoppedDropping bool
+	return filter(func(index int, item T) (bool, bool, error) {
+		if stoppedDropping {
+			return true, true, nil
+		}
+
+		dropped, err := pred(index, item)
+		if err != nil {
+			return false, false, err
+		}
+		if dropped {
+			return false, true, nil
+		}
+
+		stoppedDropping = true
+		return true, true, nil
+	})
+}
+
+// Splice returns a modifier which replaces items in the range [from, to) with all items from injected.
+func Splice[T any](from, to int, injected Iterator[T]) Modifier[T, T] {
+	return func(iter Iterator[T]) Iterator[T] {
+		if from != to {
+			iter = filter(func(index int, _ T) (bool, bool, error) {
+				if index >= from && (to == -1 || index < to) {
+					return false, to != -1, nil
+				}
+				return true, true, nil
+			})(iter)
+		}
+		if injected != nil {
+			iter = Inject(from, injected)(iter)
+		}
+		return iter
+	}
+}
+
 func filter[T any](fn func(int, T) (matches bool, canContinue bool, err error)) Modifier[T, T] {
 	return filterMap(func(index int, item T) (T, bool, bool, error) {
 		matches, canContinue, err := fn(index, item)

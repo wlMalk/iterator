@@ -19,6 +19,21 @@ func TestTakeWhile(t *testing.T) {
 	}
 }
 
+func TestDropWhile(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		pred     func(int, int) (bool, error)
+		expected []int
+	}{
+		{Range(0, 5, 1), func(_, item int) (bool, error) { return item < 3, nil }, []int{3, 4, 5}},
+		{FromSlice([]int{0, 1, 2, 3, 0, 1, 2, 3, 4}), func(_, item int) (bool, error) { return item < 3, nil }, []int{3, 0, 1, 2, 3, 4}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, DropWhile(cases[i].pred)(cases[i].iter), cases[i].expected)
+	}
+}
+
 func TestSlice(t *testing.T) {
 	cases := []struct {
 		iter           Iterator[int]
@@ -35,5 +50,24 @@ func TestSlice(t *testing.T) {
 
 	for i := range cases {
 		checkIteratorEqual(t, Slice[int](cases[i].from, cases[i].to, cases[i].step)(cases[i].iter), cases[i].expected)
+	}
+}
+
+func TestSplice(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		from, to int
+		injected Iterator[int]
+		expected []int
+	}{
+		{Range(0, 5, 1), 2, 5, nil, []int{0, 1, 5}},
+		{Range(0, 5, 1), 2, 5, FromSlice([]int{0, 1}), []int{0, 1, 0, 1, 5}},
+		{Range(0, 5, 1), 2, 2, FromSlice([]int{0, 1}), []int{0, 1, 0, 1, 2, 3, 4, 5}},
+		{Range(0, 5, 1), 2, -1, FromSlice([]int{0, 1}), []int{0, 1, 0, 1}},
+		{Range(0, 5, 1), 0, -1, FromSlice([]int{0, 1}), []int{0, 1}},
+	}
+
+	for i := range cases {
+		checkIteratorEqual(t, Splice(cases[i].from, cases[i].to, cases[i].injected)(cases[i].iter), cases[i].expected)
 	}
 }
