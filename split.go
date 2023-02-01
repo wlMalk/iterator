@@ -64,6 +64,11 @@ func SplitFunc[T any](fn func(int, T) (split, inA, inB bool, err error)) Modifie
 			if err != nil {
 				return false
 			}
+			_, _, _, fnErr := fn(count, item)
+			if fnErr != nil {
+				err = fnErr
+				return false
+			}
 
 			startWithItem = true
 			curr = FromFunc(next())
@@ -143,4 +148,33 @@ func Chunk[T any](size int) Modifier[T, Iterator[T]] {
 			return shouldSplit, false, shouldSplit, nil
 		})(iter)
 	}
+}
+
+// RunsFunc is a modifier that splits the iterator into multiple iterators each containing
+// matching consecutive items using fn to get a comparable key for each item.
+func RunsFunc[T any, S comparable](fn func(int, T) (S, error)) Modifier[T, Iterator[T]] {
+	return func(iter Iterator[T]) Iterator[Iterator[T]] {
+		var lastKey S
+		return SplitFunc(func(i int, item T) (bool, bool, bool, error) {
+			key, err := fn(i, item)
+			if err != nil {
+				return false, false, false, err
+			}
+
+			if i > 0 && key != lastKey {
+				lastKey = key
+				return true, false, true, nil
+			}
+			if i == 0 {
+				lastKey = key
+			}
+			return false, false, false, nil
+		})(iter)
+	}
+}
+
+// Runs is a modifier that splits the iterator into multiple iterators each containing
+// matching consecutive items.
+func Runs[T comparable](iter Iterator[T]) Iterator[Iterator[T]] {
+	return RunsFunc(func(_ int, item T) (T, error) { return item, nil })(iter)
 }

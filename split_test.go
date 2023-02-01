@@ -81,3 +81,18 @@ func TestChunk(t *testing.T) {
 		checkIteratorSliceEqual(t, cases[i].iter, cases[i].expected)
 	}
 }
+
+func TestRuns(t *testing.T) {
+	cases := []struct {
+		iter     Iterator[int]
+		expected [][]int
+	}{
+		{Empty[int](), [][]int{}},
+		{FromSlice([]int{1, 2, 1, 2}), [][]int{{1}, {2}, {1}, {2}}},
+		{FromSlice([]int{1, 1, 2, 2, 3, 3}), [][]int{{1, 1}, {2, 2}, {3, 3}}},
+	}
+
+	for i := range cases {
+		checkIteratorSliceEqual(t, ToSlices(Runs(cases[i].iter)), cases[i].expected)
+	}
+}
