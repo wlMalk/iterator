@@ -71,11 +71,11 @@ func Range[T constraints.Float | constraints.Integer](start T, end T, step T) It
 	}
 
 	if asc {
-		return Pipe(Ascending(start, step), LimitFunc(func(_ int, item T) (bool, error) {
+		return Pipe(Ascending(start, step), TakeWhile(func(_ int, item T) (bool, error) {
 			return item <= end, nil
 		}))
 	} else {
-		return Pipe(Descending(start, step), LimitFunc(func(_ int, item T) (bool, error) {
+		return Pipe(Descending(start, step), TakeWhile(func(_ int, item T) (bool, error) {
 			return item >= end, nil
 		}))
 	}

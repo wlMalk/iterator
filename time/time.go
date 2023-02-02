@@ -61,11 +61,11 @@ func Range(start time.Time, end time.Time, step time.Duration) iterator.Iterator
 	}
 
 	if asc {
-		return iterator.Pipe(Ascending(start, step), iterator.LimitFunc(func(_ int, item time.Time) (bool, error) {
+		return iterator.Pipe(Ascending(start, step), iterator.TakeWhile(func(_ int, item time.Time) (bool, error) {
 			return !end.Before(item), nil
 		}))
 	} else {
-		return iterator.Pipe(Descending(start, step), iterator.LimitFunc(func(_ int, item time.Time) (bool, error) {
+		return iterator.Pipe(Descending(start, step), iterator.TakeWhile(func(_ int, item time.Time) (bool, error) {
 			return !item.Before(end), nil
 		}))
 	}
