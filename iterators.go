@@ -208,6 +208,7 @@ func ToMap[K comparable, V any](iter Iterator[KV[K, V]]) (map[K]V, error) {
 // OnClose extends an iterator with a close callback
 func OnClose[T any](iter Iterator[T], fn func() error) Iterator[T] {
 	var err error
+	var closed bool
 	return &iterator[T]{
 		next: iter.Next,
 		get:  iter.Get,
@@ -218,7 +219,13 @@ func OnClose[T any](iter Iterator[T], fn func() error) Iterator[T] {
 			return iter.Err()
 		},
 		close: func() error {
-			defer iter.Close()
+			if closed {
+				return err
+			}
+			defer func() {
+				closed = true
+				iter.Close()
+			}()
 			if err = fn(); err != nil {
 				return err
 			}
